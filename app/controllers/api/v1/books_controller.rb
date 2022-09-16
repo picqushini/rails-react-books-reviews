@@ -6,13 +6,13 @@ module Api
       def index
         books = Book.all
 
-        BookSerializer.new(books).serialized_json
+        render json: BookSerializer.new(books, options).serialized_json
       end
 
       def show
         book = Book.find_by(slug: params[:slug])
 
-        render json: BookSerializer.new(book).serialized_json
+        render json: BookSerializer.new(book, options).serialized_json
       end
 
       def create
@@ -29,7 +29,7 @@ module Api
         book = Book.find_by(slug: params[:slug])
 
         if Book.update
-          render json: BookSerializer.save(book).serialized_json
+          render json: BookSerializer.save(book, options).serialized_json
         else
           render json: {error: book.errors.messages}, status: 422
         end
@@ -50,6 +50,15 @@ module Api
       def book_params
         params.require(book).permit(:title, :image_url)
       end
+
+      def options
+
+        # turn into compund document
+        # aka when we make a new instance of BookSeralizer we pass in an options hash and specify the additional resources
+        # that we want to include with that
+        @options || = {include: %i[reviews]}
+      end
+
     end
   end
 end
