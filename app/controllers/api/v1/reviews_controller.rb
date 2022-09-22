@@ -3,30 +3,32 @@ module Api
 
     class ReviewsController < ApplicationController
 
+      protect_from_forgery with: :null_session
+
       def create
         review = Review.new(review_params)
 
         if review.save
-          render json: ReviewSerializer.save(review).serialized_json
+          render json: ReviewSerializer.new(review)
         else
-          render json: {error: review.errors.messages}, status: 422
+          render json: { error: review.errors.messages }, status: 422
         end
       end
 
       def destroy
-        review = Review.find_by(params[:id])
+        review = Review.find(params[:id])
 
         if review.destroy
-          render :no_content
+          head :no_content
         else
-          render json: {error: review.errors.messages}, status: 422
+          render json: { error: review.errors.messages }, status: 422
         end
       end
 
       private
 
       def review_params
-        params.require(review).permit(:title, :description, :book_id)
+        params.require(:review).permit(:title, :description, :book_id)
       end
     end
   end
